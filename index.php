@@ -12,7 +12,7 @@
     }
 
 
-    $search = "i need a Bike";
+    $search = "i need a Bike whice price is more then 500 to 1000";
 
     function removeShortElements($array, $length) {
         $k = 0;
@@ -24,55 +24,112 @@
         return $newArr;
     }
 
-    function searchCatagory($res,$key){
-        echo '^^^^^^^^^';
-            while($data = mysqli_fetch_assoc($res)){
-                    echo $key."+".$data["p_catagory"]."******";
-
-                    if($key == $data["p_catagory"]){
-                       // echo "IF : ".$filtered[$i]." ".$data["p_catagory"];
-                    }
-            }
-
-            echo 'end first';
-    }
 
     function getCatagory($string,$con){
+        $catagory = null;
         $search_arr = explode(" ", $string);
         $filtered = removeShortElements($search_arr,2);
 
-        // Convert array to comma-separated string
-        //$stringList = implode(',', $filtered);
         $stringList = "'" . implode("','", $filtered) . "'";
 
-        print_r($stringList);
         $sql = "SELECT p_catagory FROM `products` WHERE p_catagory IN ($stringList)";
         $res = mysqli_query($con, $sql);
 
        if (mysqli_num_rows($res) > 0) {
-            echo "<table>";
-            echo "<tr><th>Name</th>";
             while($data = mysqli_fetch_assoc($res)) {
-                echo "<tr><td>" . $data["p_catagory"];
+                $catagory = $data["p_catagory"];
+                break;
             }
-            echo "</table>";
         }
-        
+        return $catagory;
+    }
+    //getCatagory($search,$conn);
 
-        /*$catagorySql = "SELECT DISTINCT p_catagory FROM `products`";
-        $res = mysqli_query($con,$catagorySql);
 
-        echo "Size -> ".sizeof($filtered);
+    function isOnePricesGiven($searchArray){
+        $check=0;
+        for($i=0; $i<sizeof($searchArray); $i++){
+            if(is_numeric($searchArray[$i])){
+                $p1 = $searchArray[$i];
+                $check++;
+            }
+        }   
 
-        for($i=0; $i<sizeof($filtered); $i++){
-            echo 'hello';
-            searchCatagory($res,$filtered[$i]);
-        }*/
-
-        //print_r($filtered);
+        if($check==0)
+            return -1;
+        elseif($check==1)
+            return $p1;
+        else
+            return false;
     }
 
-    getCatagory($search,$conn);
+    function getBudget($searchArray){
+        for($i=0; $i<sizeof($searchArray); $i++){
+            if(is_numeric($searchArray[$i])){
+                return $i;
+            }
+        }
+        return -1;
+    }
+
+    function getPrice($string,$con){
+        $searchArray = explode(" ", $string);
+
+        //find price syntex or budget sintex.
+        $indexOfPrice = array_search('price', $searchArray);
+        if(!$indexOfPrice)$indexOfBudget = getBudget($searchArray);
+
+        //remove unusefull string's
+        if($indexOfPrice)
+            array_splice($searchArray, 0, $indexOfPrice-2);
+        else
+            array_splice($searchArray, 0, $indexOfBudget-2);
+
+        //now convert array to string;
+        $searchString = implode(" ", $searchArray);
+        echo $searchString.'$$$$$$$$';
+
+        //findout bigger than or less than.
+        $lessOrequal = "/(of|in)\s+price\s+(\d)+|price\s+(of|in)\s+(\d)+|price\s+\w+\s+(\d)+|price\s+\d+|price\s+\d+|(\w)+\s+(in|of)\s+\d+/i";
+        $gratThenOrequal = "/(out)\s+(of)?\s+(price)\s+\d+|(\w{2,3})?(\s)?(price\s)?(more)\s+(than)\s+\d+|price\s+(out)\s+\w+\s+\d+|(out)\s+\w+\s+\d+/i";
+
+        if(preg_match($lessOrequal, $searchString)){
+            echo 'less than'.'<------>';
+        }
+
+        if(preg_match($gratThenOrequal, $searchString)){
+            echo 'more than';
+        }
+
+
+
+
+
+        foreach($searchArray as $val){
+           // echo $val.' ';
+        }
+        //echo $indexOfBudget;
+
+
+
+
+
+        //remove unusefull string's
+        //array_splice($searchArray, 0, $indexOfPrice);
+
+
+        //$check =  isOnePricesGiven($searchArray);
+
+        
+
+
+
+        
+
+    }
+
+    getPrice($search,$conn);
+
 
 
     
