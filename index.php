@@ -12,7 +12,9 @@
     }
 
 
-    $search = "i want to buy a telivision of 42 fit out of 5000";
+    $search = "i want to buy a telivision of 42 fit around 5000 to 6000";
+    $shortestSearArr;
+
 
     function removeShortElements($array, $length) {
         $k = 0;
@@ -41,7 +43,7 @@
         }
         return $catagory;
     }
-    //getCatagory($search,$conn);
+    //echo getCatagory($search,$conn);
 
 
     function isOnePricesGiven($searchArray){
@@ -64,14 +66,12 @@
         else
             return $multiPrice;
     }
-
     function isPrice($searchArray,$i){
         array_splice($searchArray, 0, $i);
         $searchStr = implode(" ", $searchArray);
         $detectPricePtrn = '/\b\d+(?:\.\d+)?\s+(?:feet|scal|inch|y[e]?rs|fit|m(?:eter|etre)s?)\b/i';
         return preg_match($detectPricePtrn, $searchStr)?false:true;
     }
-
     function getBudget($searchArray){
         $index = -1;
         for($i=0; $i<sizeof($searchArray); $i++){
@@ -84,9 +84,9 @@
         }
         return $index;
     }
-
     function getPrice($string,$con){
         $searchArray = explode(" ", $string);
+        $tempArr = $searchArray;
 
         //find price syntex or budget sintex.
         $indexOfPrice = array_search('price', $searchArray);
@@ -98,10 +98,13 @@
         else
             array_splice($searchArray, 0, $indexOfBudget-2);
 
-
+ 
         //see our filtred string
-        print_r($searchArray).' </br>';
+        //print_r($searchArray);
 
+        //pass shorted array for better analysis
+        global $shortestSearArr;
+        $shortestSearArr = array_diff($tempArr,$searchArray);
 
         //now convert array to string;
         $searchString = implode(" ", $searchArray);
@@ -112,10 +115,8 @@
 
         if($prices =  is_array($check)){
             return $check;
-
         }elseif($check == -1){
             return -1;
-
         }else{
 
             //findout bigger than or less than.
@@ -133,21 +134,16 @@
             }
 
         }
-
-
-
-
-        foreach($searchArray as $val){
-           // echo $val.' ';
-        }
-        //echo $indexOfBudget;
-
     }
+    getPrice($search,$conn);
 
-    $pp = getPrice($search,$conn);
 
-    print_r($pp);
+    function getName($shortestSearArr,$con){
+        print_r($shortestSearArr);
 
+        
+    }
+    getName($shortestSearArr,$conn);
 
     
     /*
