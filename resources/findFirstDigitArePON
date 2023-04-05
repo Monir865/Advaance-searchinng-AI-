@@ -1,0 +1,9 @@
+a scale 12 feet
+buy a 130 scal
+to buy 32 inch
+cat with 12 yers
+car of 5 fit
+of size 5.2 metter
+
+
+$pattern = '/\b\d+(?:\.\d+)?\s+(?:feet|scal|inch|y[e]?rs|fit|m(?:eter|etre)s?)\b/i';

@@ -12,7 +12,7 @@
     }
 
 
-    $search = "i need a Bike whice price is more then 500 to 1000";
+    $search = "i want to buy a telivision of 42 fit out of 5000";
 
     function removeShortElements($array, $length) {
         $k = 0;
@@ -23,8 +23,6 @@
         }
         return $newArr;
     }
-
-
     function getCatagory($string,$con){
         $catagory = null;
         $search_arr = explode(" ", $string);
@@ -48,28 +46,43 @@
 
     function isOnePricesGiven($searchArray){
         $check=0;
+        $k=0;
         for($i=0; $i<sizeof($searchArray); $i++){
             if(is_numeric($searchArray[$i])){
                 $p1 = $searchArray[$i];
+                $multiPrice[$k++] = $searchArray[$i];
                 $check++;
             }
         }   
+
+        //$approval = "";
 
         if($check==0)
             return -1;
         elseif($check==1)
             return $p1;
         else
-            return false;
+            return $multiPrice;
+    }
+
+    function isPrice($searchArray,$i){
+        array_splice($searchArray, 0, $i);
+        $searchStr = implode(" ", $searchArray);
+        $detectPricePtrn = '/\b\d+(?:\.\d+)?\s+(?:feet|scal|inch|y[e]?rs|fit|m(?:eter|etre)s?)\b/i';
+        return preg_match($detectPricePtrn, $searchStr)?false:true;
     }
 
     function getBudget($searchArray){
+        $index = -1;
         for($i=0; $i<sizeof($searchArray); $i++){
             if(is_numeric($searchArray[$i])){
-                return $i;
+                if(isPrice($searchArray,$i)){
+                    $index = $i;
+                    break;
+                };
             }
         }
-        return -1;
+        return $index;
     }
 
     function getPrice($string,$con){
@@ -85,22 +98,41 @@
         else
             array_splice($searchArray, 0, $indexOfBudget-2);
 
+
+        //see our filtred string
+        print_r($searchArray).' </br>';
+
+
         //now convert array to string;
         $searchString = implode(" ", $searchArray);
-        echo $searchString.'$$$$$$$$';
 
-        //findout bigger than or less than.
-        $lessOrequal = "/(of|in)\s+price\s+(\d)+|price\s+(of|in)\s+(\d)+|price\s+\w+\s+(\d)+|price\s+\d+|price\s+\d+|(\w)+\s+(in|of)\s+\d+/i";
-        $gratThenOrequal = "/(out)\s+(of)?\s+(price)\s+\d+|(\w{2,3})?(\s)?(price\s)?(more)\s+(than)\s+\d+|price\s+(out)\s+\w+\s+\d+|(out)\s+\w+\s+\d+/i";
+        //in this step we have to detect how much price's are given by user
+        $check =  isOnePricesGiven($searchArray);
 
-        if(preg_match($lessOrequal, $searchString)){
-            echo 'less than'.'<------>';
+
+        if($prices =  is_array($check)){
+            return $check;
+
+        }elseif($check == -1){
+            return -1;
+
+        }else{
+
+            //findout bigger than or less than.
+            $lessOrequal = "/\b\w+\b(?:\s+(?:in|of|are|which)\s+)?(?:a\s+)?(?:\w+\s+)?(?:price\s+(?:around|in|of|less\s+than|under|are|to)\s+)?(\d{4,6})(?:\s+\w+)?\b/i";
+            $gratThenOrequal = "/\b(price|cost)\b.*?(more than|greater|upper|out of|between)\s+(\d+).*?(\d+)?/i";
+            
+            $l = "/\b\w+\b(?:\s+(?:in|of|are|which)\s+)?(?:a\s+)?(?:\w+\s+)?(?:price\s+(?:around|in|of|less\s+than|under|are|to)\s+)?(\d{4,6})(?:\s+\w+)?\b|(\w\d)+[\'\"^*]+(\s+)?(\w+)?(\s+)?(\w+)?(\s+)?\d+/i";
+            $g = "/\b(price|cost)\b.*?(more than|greater|upper|out of|between)\s+(\d+).*?(\d+)?|(\w\d)+[\'\"^*]+(\s+)?(\w+)?(\s+)?(\w+)?(\s+)?\d+/i";
+
+            if(preg_match($g, $searchString)){
+                return 'greater '.$check;
+            }
+            if(preg_match($l, $searchString)){
+                return 'less '.$check;
+            }
+
         }
-
-        if(preg_match($gratThenOrequal, $searchString)){
-            echo 'more than';
-        }
-
 
 
 
@@ -110,29 +142,15 @@
         }
         //echo $indexOfBudget;
 
-
-
-
-
-        //remove unusefull string's
-        //array_splice($searchArray, 0, $indexOfPrice);
-
-
-        //$check =  isOnePricesGiven($searchArray);
-
-        
-
-
-
-        
-
     }
 
-    getPrice($search,$conn);
+    $pp = getPrice($search,$conn);
 
+    print_r($pp);
 
 
     
+    /*
     $sql = "SELECT *  FROM `products`  WHERE p_catagory = '$search'";
     $res = mysqli_query($conn,$sql);
 
@@ -145,7 +163,7 @@
         echo "</table>";
     } else {
        // echo "0 results";
-    }
+    }*/
 
 
 
