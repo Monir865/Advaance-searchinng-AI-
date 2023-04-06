@@ -12,7 +12,7 @@
     }
 
 
-    $search = "i want to buy a telivision of 42 fit around 5000 to 6000";
+    $search = "i want to buy a  tv of 42 fit around 5000 to 6000";
     $shortestSearArr;
 
 
@@ -31,6 +31,7 @@
         $filtered = removeShortElements($search_arr,2);
 
         $stringList = "'" . implode("','", $filtered) . "'";
+        echo $stringList.'</br>';
 
         $sql = "SELECT p_catagory FROM `products` WHERE p_catagory IN ($stringList)";
         $res = mysqli_query($con, $sql);
@@ -43,7 +44,7 @@
         }
         return $catagory;
     }
-    //echo getCatagory($search,$conn);
+    echo getCatagory($search,$conn);
 
 
     function isOnePricesGiven($searchArray){
@@ -138,12 +139,34 @@
     getPrice($search,$conn);
 
 
-    function getName($shortestSearArr,$con){
-        print_r($shortestSearArr);
 
-        
+    function detectName($val ,$con){
+        $sql = "SELECT * FROM `products` WHERE p_name LIKE '%$val%'";
+        $res = mysqli_query($con, $sql);
+
+    
+       if (mysqli_num_rows($res) > 0) {
+            while($data = mysqli_fetch_assoc($res)) {
+                return true;
+            }
+        }
+        return false;
     }
-    getName($shortestSearArr,$conn);
+    function getName($shortestSearArr,$con){
+        $inSquence = array_values($shortestSearArr);
+        $filtered = removeShortElements($inSquence,1);
+
+        $j=0;
+        $p_name[] = NULL;
+        for($i=0; $i<sizeof($filtered); $i++){
+            if(detectName($filtered[$i],$con)==true){
+                $p_name[$j++] = $filtered[$i];
+            }
+        }
+        
+        return $p_name;   
+    }
+    print_r(getName($shortestSearArr,$conn));
 
     
     /*
